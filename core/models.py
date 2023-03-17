@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify 
+from django.utils.crypto import get_random_string 
 
 class Bread(models.Model):
     name = models.CharField('Nome', max_length=100)
@@ -17,5 +18,66 @@ class Bread(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.type_frame)
+        self.slug = slugify(self.name)
         super(Bread, self).save(*args, **kwargs)
+
+
+class SaleItem(models.Model):
+    item =  models.OneToOneField(Bread, on_delete=models.CASCADE, verbose_name='Item', blank=False, null=False)
+    quatity = models.PositiveSmallIntegerField('Quatidade')
+    price_sum = models.DecimalField('Sub Total', max_digits=6, decimal_places=2)
+    
+    class Meta:
+        verbose_name = 'Item de venda'
+        verbose_name_plural = 'Itens'
+
+    def __str__(self):
+        return self.item.name
+    
+    def get_price_sum(self):
+        return self.quatity * self.item.price
+    
+    def save(self, *args, **kwargs):
+        self.price_sum = self.get_price_sum()
+        super(SaleItem, self).save(*args, **kwargs)
+
+
+class Sale(models.Model):
+    items = models.ForeignKey(SaleItem, on_delete=models.CASCADE, verbose_name='items', blank=False, null=False)
+    total_price = models.DecimalField('Preço Total', max_digits=6, decimal_places=2)
+    customer_name = models.CharField('Nome do Cliente', max_length=100)
+    customer_phone_number = models.CharField('Telefone do Cliente', max_length=11)
+    code = get_random_string(5)
+
+    class Meta:
+        verbose_name = 'Venda'
+        verbose_name_plural = 'Vendas'
+
+    def __str__(self):
+        return self.code
+    
+    def get_sum_of_items(self):
+        return sum(self.items.priceSum)
+    
+    def save(self, *args, **kwargs):
+        self.total_price = self.get_sum_of_items()
+        super(SaleItem, self).save(*args, **kwargs)
+
+
+class Campaing(models.Model):
+    delivery_date = models.DateTimeField('Data de Entrega', auto_now=False, auto_now_add=False, blank=True, null=True,)
+    slug = models.SlugField('Identificador', unique=True, editable=True)
+    sales = models.ForeignKey(Sale, on_delete=models.CASCADE, verbose_name='Vendas', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Campanha'
+        verbose_name_plural = 'Campanhas'
+
+    def __str__(self):
+        return self.delivery_date
+    
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.delivery_date)
+        super(Campaing, self).save(*args, **kwargs)
+
+
