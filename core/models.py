@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.text import slugify 
 from django.utils.crypto import get_random_string 
+from datetime import datetime
 
 class Bread(models.Model):
     name = models.CharField('Nome', max_length=100)
@@ -65,9 +66,11 @@ class Sale(models.Model):
 
 
 class Campaing(models.Model):
-    delivery_date = models.DateTimeField('Data de Entrega', auto_now=False, auto_now_add=False, blank=True, null=True,)
+    delivery_date = models.DateTimeField('Data de Entrega', auto_now=False, auto_now_add=False, blank=True, null=True)
     slug = models.SlugField('Identificador', unique=True, editable=True)
     sales = models.ForeignKey(Sale, on_delete=models.CASCADE, verbose_name='Vendas', blank=True, null=True)
+    active = models.BooleanField('Ativa', default=True)
+    endDate = models.DateTimeField('Data de Entrega', auto_now=False, auto_now_add=False, blank=True, null=True)
 
     class Meta:
         verbose_name = 'Campanha'
@@ -77,6 +80,8 @@ class Campaing(models.Model):
         return str(self.delivery_date)
     
     def save(self, *args, **kwargs):
+        if not self.active:
+            self.endDate = datetime.now()
         super(Campaing, self).save(*args, **kwargs)
 
 
