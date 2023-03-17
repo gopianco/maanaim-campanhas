@@ -74,10 +74,9 @@ class Campaing(models.Model):
         verbose_name_plural = 'Campanhas'
 
     def __str__(self):
-        return self.delivery_date
+        return str(self.delivery_date)
     
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.delivery_date)
         super(Campaing, self).save(*args, **kwargs)
 
 
