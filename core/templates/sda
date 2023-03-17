@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Produtos à venda</title>
+    <style>
+      /* Estilos CSS */
+      * {
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      
+      body {
+        background-color: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      
+      .container {
+        width: 90%;
+        max-width: 800px;
+        margin: 2rem auto;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        border-radius: 8px;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1rem;
+      }
+      
+      th,
+      td {
+        text-align: center;
+        padding: 0.5rem;
+      }
+      
+      th {
+        background-color: #f5f5f5;
+      }
+      
+      thead th:first-child,
+      tbody td:first-child {
+        width: 20%;
+      }
+      
+      thead th:nth-child(2),
+      tbody td:nth-child(2) {
+        width: 40%;
+      }
+      
+      thead th:last-child,
+      tbody td:last-child {
+        width: 40%;
+      }
+      
+      tbody td {
+        vertical-align: middle;
+      }
+      
+      .produto {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1rem 0;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 1rem;
+      }
+      
+      .produto img {
+        width: 100px;
+        margin-right: 1rem;
+      }
+      
+      .produto h3 {
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+      }
+      
+      .preco {
+        font-weight: bold;
+      }
+      
+      .quantidade {
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .mais,
+      .menos {
+        background-color: transparent;
+        border: none;
+        color: #333;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        margin: 0 0.5rem;
+      }
+      
+      .mais:hover,
+      .menos:hover {
+        color: #666;
+      }
+      
+      .total {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 1rem;
+        text-align: right;
+      }
+      
+    </style>
+  </head>
+  <body>
+    <h1>Produtos à venda</h1>
+    
+    
+
+    <table>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Preço unitário</th>
+          <th>Preço total</th>
+        </tr>
+        {% for product in product_list %}
+         
+        <tr>
+            <td>
+              <img src="{{ product.image.url }}" alt="Produto 1" width="100">
+              <span>{{ product }}</span>
+            </td>
+            <td>
+              <button class="menos">-</button>
+              <span class="quantidade">0</span>
+              <button class="mais">+</button>
+            </td>
+            <td>R$ {{ product.price }}</td>
+            <td class="preco-total">R$ 0,00</td>
+        </tr>
+        {% endfor %}
+
+        <tr>
+          <td colspan="3">Total:</td>
+          <td class="total">R$ 0,00</td>
+        </tr>
+      </table>
+    </div>
+    
+    <script>
+      // Script JavaScript
+      const precos = [50, 80, 120];
+
+        const botoesMais = document.querySelectorAll(".mais");
+        const botoesMenos = document.querySelectorAll(".menos");
+        const quantidades = document.querySelectorAll(".quantidade");
+        const precosTotais = document.querySelectorAll(".preco-total");
+
+        let contador1 = 0;
+        let contador2 = 0;
+        let contador3 = 0;
+
+        let precoTotal1 = 0;
+        let precoTotal2 = 0;
+        let precoTotal3 = 0;
+
+        botoesMais[0].addEventListener("click", () => {
+        contador1++;
+        quantidades[0].textContent = contador1;
+        precoTotal1 += precos[0];
+        atualizarPreco(0, precoTotal1);
+        });
+
+        botoesMenos[0].addEventListener("click", () => {
+        if (contador1 > 0) {
+            contador1--;
+            quantidades[0].textContent = contador1;
+            precoTotal1 -= precos[0];
+            atualizarPreco(0, precoTotal1);
+        }
+        });
+
+        botoesMais[1].addEventListener("click", () => {
+        contador2++;
+        quantidades[1].textContent = contador2;
+        precoTotal2 += precos[1];
+        atualizarPreco(1, precoTotal2);
+        });
+
+        botoesMenos[1].addEventListener("click", () => {
+        if (contador2 > 0) {
+            contador2--;
+            quantidades[1].textContent = contador2;
+            precoTotal2 -= precos[1];
+            atualizarPreco(1, precoTotal2);
+        }
+        });
+
+        botoesMais[2].addEventListener("click", () => {
+        contador3++;
+        quantidades[2].textContent = contador3;
+        precoTotal3 += precos[2];
+        atualizarPreco(2, precoTotal3);
+        });
+
+        botoesMenos[2].addEventListener("click", () => {
+        if (contador3 > 0) {
+            contador3--;
+            quantidades[2].textContent = contador3;
+            precoTotal3 -= precos[2];
+            atualizarPreco(2, precoTotal3);
+        }
+        });
+
+        function atualizarPreco(indice, precoTotal) {
+        precosTotais[indice].textContent = "R$ " + precoTotal.toFixed(2);
+        calcularTotal();
+        }
+
+        function calcularTotal() {
+        let total = precoTotal1 + precoTotal2 + precoTotal3;
+        const totalElemento = document.querySelector(".total");
+        totalElemento.textContent = "Total: R$ " + total.toFixed(2);
+        }
+    </script>
+  </body>
+</html>

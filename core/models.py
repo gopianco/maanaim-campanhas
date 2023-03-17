@@ -9,7 +9,7 @@ class Bread(models.Model):
     price = models.DecimalField('Preço', max_digits=5, decimal_places=2)
     slug = models.SlugField('Identificador', unique=True, editable=False)
     image = models.ImageField('Imagem', upload_to='bread', blank=True, null=True)
-    weight = models.PositiveIntegerField('Peso em Kg')
+    weight = models.DecimalField('Peso em Kg', max_digits=5, decimal_places=3)
 
     class Meta:
         verbose_name = 'Pão'
