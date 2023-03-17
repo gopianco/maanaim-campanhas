@@ -7,44 +7,44 @@
 ### Install Django
 
 ```
-$ mkdir vercel-django-example
-$ cd vercel-django-example
+$ mkdir vercel-django-core
+$ cd vercel-django-core
 $ pip install Django
-$ django-admin startproject vercel_app .
+$ django-admin startproject maanaim_campanhas .
 ```
 
 ### Add an app
 
 ```
-$ python manage.py startapp example
+$ python manage.py startapp core
 ```
 
-Add the new app to your application settings (`vercel_app/settings.py`):
+Add the new app to your application settings (`maanaim_campanhas/settings.py`):
 ```python
-# vercel_app/settings.py
+# maanaim_campanhas/settings.py
 INSTALLED_APPS = [
     # ...
-    'example',
+    'core',
 ]
 ```
 
-Be sure to also include your new app URLs in your project URLs file (`vercel_app/urls.py`):
+Be sure to also include your new app URLs in your project URLs file (`maanaim_campanhas/urls.py`):
 ```python
-# vercel_app/urls.py
+# maanaim_campanhas/urls.py
 from django.urls import path, include
 
 urlpatterns = [
     ...
-    path('', include('example.urls')),
+    path('', include('core.urls')),
 ]
 ```
 
 
 #### Create the first view
 
-Add the code below (a simple view that returns the current time) to `example/views.py`:
+Add the code below (a simple view that returns the current time) to `core/views.py`:
 ```python
-# example/views.py
+# core/views.py
 from datetime import datetime
 
 from django.http import HttpResponse
@@ -66,12 +66,12 @@ def index(request):
 
 #### Add the first URL
 
-Add the code below to a new file `example/urls.py`:
+Add the code below to a new file `core/urls.py`:
 ```python
-# example/urls.py
+# core/urls.py
 from django.urls import path
 
-from example.views import index
+from core.views import index
 
 
 urlpatterns = [
@@ -96,26 +96,26 @@ Create a new file `vercel.json` and add the code below to it:
 ```json
 {
     "builds": [{
-        "src": "vercel_app/wsgi.py",
+        "src": "maanaim_campanhas/wsgi.py",
         "use": "@ardnt/vercel-python-wsgi",
         "config": { "maxLambdaSize": "15mb" }
     }],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "vercel_app/wsgi.py"
+            "dest": "maanaim_campanhas/wsgi.py"
         }
     ]
 }
 ```
 This configuration sets up a few things:
-1. `"src": "vercel_app/wsgi.py"` tells Vercel that `wsgi.py` contains a WSGI application
+1. `"src": "maanaim_campanhas/wsgi.py"` tells Vercel that `wsgi.py` contains a WSGI application
 2. `"use": "@ardnt/vercel-python-wsgi"` tells Now to use the `vercel-python-wsgi` builder (you can
    read more about the builder at https://github.com/ardnt/vercel-python-wsgi)
 3. `"config": { "maxLambdaSize": "15mb" }` ups the limit on the size of the code blob passed to
    lambda (Django is pretty beefy)
 4. `"routes": [ ... ]` tells Now to redirect all requests (`"src": "/(.*)"`) to our WSGI
-   application (`"dest": "vercel_app/wsgi.py"`)
+   application (`"dest": "maanaim_campanhas/wsgi.py"`)
 
 
 #### Add Django to requirements.txt
@@ -151,11 +151,11 @@ With now installed you can deploy your new application:
 ```
 $ vercel
 Vercel CLI 21.3.3
-? Set up and deploy “vercel-django-example”? [Y/n] y
+? Set up and deploy “vercel-django-maanaim-campanhas”? [Y/n] y
 ...
 ? In which directory is your code located? ./
 ...
-✅  Production: https://vercel-django-example.vercel.app [copied to clipboard] [29s]
+✅  Production: https://vercel-django-core.vercel.app [copied to clipboard] [29s]
 ```
 
 Check your results in the [Vercel dashboard](https://vercel.com/dashboard).
