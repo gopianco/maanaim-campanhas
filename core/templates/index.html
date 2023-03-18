@@ -7,6 +7,9 @@
   <title>Basket</title>
 </head>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+
+
 <style>
     @charset "utf-8";
 
@@ -417,6 +420,10 @@
 
 </style>
 
+
+
+
+
 <body>
   <main>
     <div class="basket">
@@ -433,23 +440,23 @@
           <li class="subtotal">Total</li>
         </ul>
       </div>
-      {% for product in product_list %}
+      {% for item_sale in item_sale_list %}
 
       <div class="basket-product">
         <div class="item">
           <div class="product-image">
-            <img src="{{product.item.image.url}}" alt="Placholder Image 2" class="product-frame">
+            <img src="{{item_sale.item.image.url}}" alt="Placholder Image 2" class="product-frame">
           </div>
           <div class="product-details">
-            <h1><strong> {{ product.item.name }}</strong> {{ product.item.description }}</h1>
-            <p><strong>{{ product.item.weight }} Kg</strong></p>
+            <h1><strong> {{ item_sale.item.name }}</strong> {{ item_sale.item.description }}</h1>
+            <p><strong>{{ item_sale.item.weight }} Kg</strong></p>
           </div>
         </div>
-        <div class="price">{{ product.item.price }}</div>
+        <div class="price">{{ item_sale.item.price }}</div>
         <div class="quantity">
-          <input type="number" value="1" min="1" class="quantity-field">
+          <input type="number" value="{{item_sale.quantity}}" min="1" class="quantity-field">
         </div>
-        <div class="subtotal">104.00</div>
+        <div class="subtotal">{{item_sale.price_sum}}</div>
         <div class="remove">
           <button>Remove</button>
         </div>
@@ -460,10 +467,17 @@
     </div>
     <aside>
       <div class="summary">
+        <div class='delivery'>
+            <h1><strong>Retirar seu pedido em:</strong></h1>
+            Rua Romeu Ceoloto, 300 - Campos Eliseos
+
+            <h1><strong>Data:</strong></h1> {{campaing_date}}
+        </div>
+
         <div class="summary-total-items"><span class="total-items"></span> Items na sua sacola</div>
         <div class="summary-subtotal">
           <div class="subtotal-title">Total</div>
-          <div class="subtotal-value final-value" id="basket-subtotal">130.00</div>
+          <div class="subtotal-value final-value" id="basket-subtotal">0.00</div>
         </div>
         <div class="summary-delivery">
           <select name="delivery-collection" class="summary-delivery-selection">
@@ -476,10 +490,10 @@
         </div>
         <div class="summary-total">
           <div class="total-title">Total</div>
-          <div class="total-value final-value" id="basket-total">130.00</div>
+          <div class="total-value final-value" id="basket-total">0.00</div>
         </div>
         <div class="summary-checkout">
-          <button class="checkout-cta">Go to Secure Checkout</button>
+          <button class="checkout-cta">Ir para o pagamento</button>
         </div>
       </div>
     </aside>
@@ -497,21 +511,6 @@ var fadeTime = 300;
 $('.quantity input').change(function() {
   updateQuantity(this);
 });
-
-let removeButton = document.getElementsByClassName("remove");
-removeButton.onclick = function(e) {
-    fetch('/updateItems', { method: 'GET' })
-    .then(Result => Result.json())
-    .then(string => {
-
-        // Printing our response 
-        console.log(string);
-          
-        // Printing our field of our response
-        console.log(`Title of our response :  ${string.title}`);
-    })
-    .catch(errorMsg => { console.log(errorMsg); });
-  }
 
 $('.remove button').click(function() {
   removeItem(this);

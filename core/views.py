@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from .models import Bread, SaleItem
+from .models import Bread, SaleItem, Campaing
 
 class IndexView(TemplateView):
     template_name = 'index.html'
@@ -10,9 +10,13 @@ class IndexView(TemplateView):
 
         sale_item_list = list()
         for product in product_list:
-            sale_item_list.append(SaleItem(item = product)) 
+            sale_item_list.append(SaleItem(item = product, quantity = 1, price_sum = product.price)) 
         
-        context['product_list'] = sale_item_list
+        campaing = Campaing.objects.filter(active=True).first()
+
+        context['item_sale_list'] = sale_item_list
+        context['campaing_date'] = campaing.delivery_date
+
         return context
     
 class SaleItemUpdateView():
