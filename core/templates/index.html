@@ -438,14 +438,14 @@
       <div class="basket-product">
         <div class="item">
           <div class="product-image">
-            <img src="{{product.image.url}}" alt="Placholder Image 2" class="product-frame">
+            <img src="{{product.item.image.url}}" alt="Placholder Image 2" class="product-frame">
           </div>
           <div class="product-details">
-            <h1><strong> {{ product }}</strong> {{ product.description }}</h1>
-            <p><strong>{{ product.weight }} Kg</strong></p>
+            <h1><strong> {{ product.item.name }}</strong> {{ product.item.description }}</h1>
+            <p><strong>{{ product.item.weight }} Kg</strong></p>
           </div>
         </div>
-        <div class="price">{{ product.price }}</div>
+        <div class="price">{{ product.item.price }}</div>
         <div class="quantity">
           <input type="number" value="1" min="1" class="quantity-field">
         </div>

@@ -6,9 +6,14 @@ class IndexView(TemplateView):
     template_name = 'index.html'
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['product_list'] = Bread.objects.all()
+        product_list = Bread.objects.all()
+
+        sale_item_list = list()
+        for product in product_list:
+            sale_item_list.append(SaleItem(item = product)) 
+        
+        context['product_list'] = sale_item_list
         return context
     
-    def add_to_bag():
-        item = SaleItem()
-        return item
+class SaleItemUpdateView():
+    model = SaleItem

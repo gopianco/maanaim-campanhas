@@ -25,9 +25,9 @@ class Bread(models.Model):
 
 class SaleItem(models.Model):
     item =  models.OneToOneField(Bread, on_delete=models.CASCADE, verbose_name='Item', blank=False, null=False)
-    quatity = models.PositiveSmallIntegerField('Quatidade')
+    quantity = models.PositiveSmallIntegerField('Quatidade')
     price_sum = models.DecimalField('Sub Total', max_digits=6, decimal_places=2)
-    
+
     class Meta:
         verbose_name = 'Item de venda'
         verbose_name_plural = 'Itens'
