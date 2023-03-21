@@ -1,4 +1,10 @@
+import json
+from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic import TemplateView
+
+import mercadopago
+sdk = mercadopago.SDK("TEST-7520689947298480-111914-7d6f09142e7ed7c41d44c5ee4b3bac09-166264262")
 
 from .models import Bread, SaleItem, Campaing
 
@@ -18,6 +24,68 @@ class IndexView(TemplateView):
         context['campaing_date'] = campaing.delivery_date
 
         return context
-    
-class SaleItemUpdateView():
-    model = SaleItem
+
+
+def create_post(request):
+    if request.method == 'POST':
+        post_text = request.POST.get('the_post')
+        response_data = {}
+
+        post = Post(text=post_text, author=request.user)
+        post.save()
+
+        response_data['result'] = 'Create post successful!'
+        response_data['postpk'] = post.pk
+        response_data['text'] = post.text
+        response_data['created'] = post.created.strftime('%B %d, %Y %I:%M %p')
+        response_data['author'] = post.author.username
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_type="application/json"
+        )
+
+def process_payment(request):
+
+    if request.method == 'POST':
+        payment_data = {
+            "transaction_amount": 100,
+            "description": "Título do produto",
+            "payment_method_id": "pix",
+            "payer": {
+                "email": "demonteiro04@gmail.com",
+                "first_name": "Débora",
+                "last_name": "Pianco",
+                "identification": {
+                    "type": "CPF",
+                    "number": "45068180831"
+                },
+                "address": {
+                    "zip_code": "06233-200",
+                    "street_name": "Av. das Nações Unidas",
+                    "street_number": "3003",
+                    "neighborhood": "Bonfim",
+                    "city": "Osasco",
+                    "federal_unit": "SP"
+                }
+            }
+         }
+
+        payment_response = sdk.payment().create(payment_data)
+        payment = payment_response["response"]['point_of_interaction']['transaction_data']
+        return render(
+            request,
+            'payment.html',
+            {'payment': payment }
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_type="application/json"
+        )
+   
