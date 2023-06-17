@@ -85,3 +85,12 @@ class Campaing(models.Model):
         super(Campaing, self).save(*args, **kwargs)
 
 
+class InstagramUser(models.Model):
+    id = models.AutoField(primary_key=True)
+    user_name = models.CharField('Nome de Usuario', max_length=100)
+    post_date = models.DateTimeField('Data do post', auto_now_add=True, blank=False)
+    post_id = models.CharField('Id do post', max_length=100)
+    rewarded = models.BooleanField('Recompensado', default=False)
+    rewarded_date = models.DateTimeField('Data da recompensa', auto_now_add=False, blank=True)
+
+
