@@ -90,7 +90,8 @@ class InstagramUser(models.Model):
     user_name = models.CharField('Nome de Usuario', max_length=100)
     post_date = models.DateTimeField('Data do post', auto_now_add=True, blank=False)
     post_id = models.CharField('Id do post', max_length=100)
-    rewarded = models.BooleanField('Recompensado', default=False)
-    rewarded_date = models.DateTimeField('Data da recompensa', auto_now_add=False, blank=True)
+    rewarded = models.BooleanField('Recompensado', default=False, blank=True)
+    rewarded_date = models.DateTimeField('Data da recompensa', auto_now_add=False, blank=True, null=True)
+    json = models.JSONField(default='', blank=True)
 
 

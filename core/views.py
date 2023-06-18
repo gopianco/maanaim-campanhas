@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -23,20 +24,29 @@ class IndexView(TemplateView):
 
         return context
 
+
 @csrf_exempt
 def mentioned(request):
     if request.method == 'POST':
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        content = body['entry']
+        content = body['value']
         
-        return HttpResponse(
-            json.dumps(content),
-            content_type="application/json"
+        isntagramUser = InstagramUser(
+            user_name = content['sender']['id'],
+            post_date = datetime.fromtimestamp(int(content['timestamp'])),
+            post_id = content['message']['mid'],
+            json = body
         )
 
-@csrf_exempt
-def mentioned(request):
+        isntagramUser.save()
+
+        print(InstagramUser)
+        return HttpResponse(
+            json.dumps( content),
+            content_type="application/json"
+        )
+    
     if request.method == 'GET':
         mode         = request.GET.get("hub.mode")
         challenge    = request.GET.get("hub.challenge")
@@ -49,6 +59,7 @@ def mentioned(request):
             )
         
         return HttpResponse('Token Fail')
+
 
 def create_post(request):
     if request.method == 'POST':
