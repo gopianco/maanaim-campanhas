@@ -29,21 +29,26 @@ def mentioned(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
         content = body['entry']
-        # response_data = {}
-
-        # post = Post(text=post_text, author=request.user)
-        # post.save()
-
-        # response_data['result'] = 'Create post successful!'
-        # response_data['postpk'] = post.pk
-        # response_data['text'] = post.text
-        # response_data['created'] = post.created.strftime('%B %d, %Y %I:%M %p')
-        # response_data['author'] = post.author.username
-
+        
         return HttpResponse(
             json.dumps(content),
             content_type="application/json"
         )
+
+@csrf_exempt
+def mentioned(request):
+    if request.method == 'GET':
+        mode         = request.GET.get("hub.mode")
+        challenge    = request.GET.get("hub.challenge")
+        verify_token = request.GET.get("hub.verify_token")
+
+        if verify_token == 'abb0c1a0-509a-4694-b595-4c616b636661':
+            return HttpResponse(
+                challenge ,
+                content_type="application/json"
+            )
+        
+        return HttpResponse('Token Fail')
 
 def create_post(request):
     if request.method == 'POST':
