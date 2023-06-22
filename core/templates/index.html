@@ -144,16 +144,21 @@
                   <p>É simples, basta postar uma foto no Instagram e marcar <strong>@desbravadoresmaanaim</strong> para receber o seu código de verificação.</p>
                   <button class="already-have-code-button" id="first-button" onclick="toggleVerificationBox()">Já tenho um código</button>
                 </div>
+                <div class="verification-content hide" id="message-content">
+                  <h1 id="message-content-h1"> </h1>
+                  <p id="message-content-p"></p>
+                  <button class="back-button" onclick="location.reload();">Voltar</button>
+                </div>
                   <div class="verification-content hide" id="verification-content">
                     <h1>Verificação de Código</h1>
                     <p>Insira o código de 6 dígitos:</p>
                     <div id="code-input" style="white-space: nowrap;">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(0)" onblur="validateInput(this)">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(1)" onblur="validateInput(this)">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(2)" onblur="validateInput(this)">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(3)" onblur="validateInput(this)">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(4)" onblur="validateInput(this)">
-                        <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(5)" onblur="validateInput(this)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(0)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 0)" onpaste="handleInputPaste(event, 0)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(1)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 1)" onpaste="handleInputPaste(event, 1)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(2)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 2)" onpaste="handleInputPaste(event, 2)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(3)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 3)" onpaste="handleInputPaste(event, 3)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(4)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 4)" onpaste="handleInputPaste(event, 4)">
+                      <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(5)" onblur="validateInput(this)" onkeydown="handleInputKeyDown(event, 5)" onpaste="handleInputPaste(event, 5)">
                     </div>
                     <div id="error-message" class="verification-error"></div>
                     <br>
@@ -185,20 +190,86 @@
         }
         
         function verifyCode() {
-            const inputs = document.getElementsByClassName("verification-input");
-            let code = "";
+          const inputs = document.getElementsByClassName("verification-input");
+          let code = "";
+        
+          if (inputs.length === 6) {
             for (let i = 0; i < inputs.length; i++) {
-                code += inputs[i].value;
+              const inputValue = inputs[i].value;
+              if (/^[a-zA-Z0-9]+$/.test(inputValue)) {
+                code += inputValue;
+              } else {
+                code = "";
+                break;
+              }
             }
-            
-            if (code === "123456") {
-                document.getElementById("verification-content").classList.add("hide");
-                document.getElementById("error-message").innerText = "";
-                document.getElementById("explanation-content").classList.remove("hide");
-                document.getElementById("first-button").classList.add("hide");
-            } else {
-                document.getElementById("error-message").innerText = "Código inválido.";
-            }
+          }
+        
+          if (code.length === 6) {
+            const url = "/verify-token"; // Substitua pela URL correta do backend
+            const data = { token: code }; // Substitua pelos dados necessários para o backend
+        
+            fetch(url, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            })
+              .then((response) => response.json())
+              .then((responseData) => {
+                document.getElementById("verification-content").classList.toggle("hide");
+                if(responseData.status == "error"){
+                  document.getElementById("message-content").classList.toggle("hide");
+                  document.getElementById("message-content-p").innerText = responseData.message;
+                  document.getElementById("message-content-h1").innerText = "Ops, aconteceu algo errado 🤔"
+                }else{
+                  document.getElementById("message-content").classList.toggle("hide");
+                  document.getElementById("message-content-p").innerText = responseData.message;
+                  document.getElementById("message-content-h1").innerText = "Parabéns receba seu chocolate! 🎉"
+                }
+              })
+            resetInputs();
+          } else {
+            document.getElementById("error-message").innerText =
+              "Código inválido. O código deve conter exatamente 6 dígitos e consistir apenas em letras ou números.";
+            resetInputs();
+          }
+        }
+        
+        function resetInputs() {
+          const inputs = document.getElementsByClassName("verification-input");
+          for (let i = 0; i < inputs.length; i++) {
+            inputs[i].value = "";
+            inputs[i].classList.remove("error");
+          }
+        }
+        
+        function moveToPreviousInput(index) {
+          const inputs = document.getElementsByClassName("verification-input");
+          if (index > 0) {
+            inputs[index - 1].focus();
+          }
+        }
+        
+        function handleInputKeyDown(event, index) {
+          if (event.key === "Backspace" && event.target.value === "") {
+            moveToPreviousInput(index);
+          }
+        }
+        
+        function handleInputPaste(event, index) {
+          const pastedText = event.clipboardData.getData("text");
+          const inputs = document.getElementsByClassName("verification-input");
+        
+          for (let i = 0; i < pastedText.length && i < inputs.length; i++) {
+            inputs[index + i].value = pastedText[i];
+            validateInput(inputs[index + i]);
+          }
+        
+          if (pastedText.length === 6) {
+            moveToNextInput(index + pastedText.length - 1);
+          }
         }
         
         function toggleVerificationBox() {

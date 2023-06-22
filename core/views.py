@@ -1,7 +1,8 @@
 import json
+import secrets
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
@@ -9,21 +10,42 @@ from .models import Bread, SaleItem, Campaing, InstagramUser
 
 class IndexView(TemplateView):
     template_name = 'index.html'
-    def get_context_data(self, **kwargs):
-        context = super(IndexView, self).get_context_data(**kwargs)
-        product_list = Bread.objects.all()
+    # def get_context_data(self, **kwargs):
+    #     context = super(IndexView, self).get_context_data(**kwargs)
+    #     product_list = Bread.objects.all()
 
-        sale_item_list = list()
-        for product in product_list:
-            sale_item_list.append(SaleItem(item = product, quantity = 1, price_sum = product.price)) 
+    #     sale_item_list = list()
+    #     for product in product_list:
+    #         sale_item_list.append(SaleItem(item = product, quantity = 1, price_sum = product.price)) 
         
-        campaing = Campaing.objects.filter(active=True).first()
+    #     campaing = Campaing.objects.filter(active=True).first()
 
-        context['item_sale_list'] = sale_item_list
-        context['campaing_date'] = campaing.delivery_date
+    #     context['item_sale_list'] = sale_item_list
+    #     context['campaing_date'] = campaing.delivery_date
 
-        return context
+        #return context
 
+
+@csrf_exempt
+def verify_token(request):
+    if request.method == 'POST':
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
+        token = body['token'] 
+        
+        try:
+            instagramUser = InstagramUser.objects.get(token=token)
+            if not instagramUser.rewarded:
+                instagramUser.rewarded = True
+                instagramUser.rewarded_date = datetime.now()
+                instagramUser.save()
+                return JsonResponse({'message': f'Parabéns {instagramUser.user_name}, Recebe sua recompensa!', 'status': 'success'})
+            else:
+                return JsonResponse({'message': f'Usuário {instagramUser.user_name} já recompensado.', 'status': 'error'})
+        except InstagramUser.DoesNotExist:
+            return JsonResponse({'message': 'Código inválido.', 'status': 'error'})
+    
+    return JsonResponse({'message': 'Método não permitido.', 'status': 'error'})
 
 @csrf_exempt
 def mentioned(request):
@@ -36,6 +58,7 @@ def mentioned(request):
             user_name = content['sender']['id'],
             post_date = datetime.fromtimestamp(int(content['timestamp'])),
             post_id = content['message']['mid'],
+            token = secrets.token_hex(3)[:6],
             json = body
         )
 
