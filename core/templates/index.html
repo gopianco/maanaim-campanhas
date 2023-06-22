@@ -21,7 +21,7 @@
         }
         
         .verification-box {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 10px;
             display: flex;
@@ -147,7 +147,7 @@
                   <div class="verification-content hide" id="verification-content">
                     <h1>Verificação de Código</h1>
                     <p>Insira o código de 6 dígitos:</p>
-                    <div id="code-input">
+                    <div id="code-input" style="white-space: nowrap;">
                         <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(0)" onblur="validateInput(this)">
                         <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(1)" onblur="validateInput(this)">
                         <input type="text" class="verification-input" maxlength="1" oninput="moveToNextInput(2)" onblur="validateInput(this)">
@@ -197,7 +197,7 @@
                 document.getElementById("explanation-content").classList.remove("hide");
                 document.getElementById("first-button").classList.add("hide");
             } else {
-                document.getElementById("error-message").innerText = "Código inválido";
+                document.getElementById("error-message").innerText = "Código inválido.";
             }
         }
         
