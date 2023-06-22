@@ -58,7 +58,7 @@ def mentioned(request):
             user_name = content['sender']['id'],
             post_date = datetime.fromtimestamp(int(content['timestamp'])),
             post_id = content['message']['mid'],
-            token = secrets.token_hex(3)[:6],
+            token = secrets.token_hex(3)[:6].upper(),
             json = body
         )
 

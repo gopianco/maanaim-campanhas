@@ -195,7 +195,7 @@
         
           if (inputs.length === 6) {
             for (let i = 0; i < inputs.length; i++) {
-              const inputValue = inputs[i].value;
+              const inputValue = inputs[i].value.toUpperCase();
               if (/^[a-zA-Z0-9]+$/.test(inputValue)) {
                 code += inputValue;
               } else {
