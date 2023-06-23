@@ -87,9 +87,9 @@ class Campaing(models.Model):
 
 class InstagramUser(models.Model):
     id = models.AutoField(primary_key=True)
-    user_name = models.CharField('Nome de Usuario', max_length=100, unique=True)
+    user_name = models.CharField('Nome de Usuario', max_length=500, unique=True)
     post_date = models.DateTimeField('Data do post', auto_now_add=True, blank=False)
-    post_id = models.CharField('Id do post', max_length=100)
+    post_id = models.CharField('Id do post', max_length=500)
     rewarded = models.BooleanField('Recompensado', default=False, blank=True)
     rewarded_date = models.DateTimeField('Data da recompensa', auto_now_add=False, blank=True, null=True)
     token = models.CharField("Token de verificacao", max_length=6, null=True )
