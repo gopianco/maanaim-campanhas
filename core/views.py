@@ -65,7 +65,7 @@ def mentioned(request):
                 post_date=datetime.fromtimestamp(timestamp / 100),
                 post_id=message_id,
                 token=secrets.token_hex(3)[:6].upper(),
-                json=body
+                json=timestamp
             )
 
             instagramUser.save()
