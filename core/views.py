@@ -1,5 +1,7 @@
 import json
+import requests
 import secrets
+import os
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
@@ -9,21 +11,6 @@ from .models import Bread, SaleItem, Campaing, InstagramUser
 
 class IndexView(TemplateView):
     template_name = 'index.html'
-    # def get_context_data(self, **kwargs):
-    #     context = super(IndexView, self).get_context_data(**kwargs)
-    #     product_list = Bread.objects.all()
-
-    #     sale_item_list = list()
-    #     for product in product_list:
-    #         sale_item_list.append(SaleItem(item = product, quantity = 1, price_sum = product.price)) 
-        
-    #     campaing = Campaing.objects.filter(active=True).first()
-
-    #     context['item_sale_list'] = sale_item_list
-    #     context['campaing_date'] = campaing.delivery_date
-
-        #return context
-
 
 @csrf_exempt
 def verify_token(request):
@@ -60,15 +47,38 @@ def mentioned(request):
             timestamp = messaging["timestamp"]
             message_id = message["mid"]
             
-            instagramUser = InstagramUser(
-                user_name=sender_id,
-                post_date=datetime.fromtimestamp(timestamp / 100),
-                post_id=message_id,
-                token=secrets.token_hex(3)[:6].upper(),
-                json=timestamp
-            )
+            secret_token = secrets.token_hex(3)[:6].upper()
 
-            instagramUser.save()
+            instagram_acces_token = os.environ('instagram_acces_token')
+
+            url = f'https://graph.facebook.com/v17.0/me/messages?access_token={instagram_acces_token}'
+
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            payload = {
+                'recipient': {
+                    'id': sender_id
+                },
+                'message': {
+                    'text': f'Seu código de verificação: {secret_token}'
+                }
+            }
+
+            response = requests.post(url, headers=headers, json=payload)
+
+            if response.status_code == 200:
+
+                instagramUser = InstagramUser(
+                    user_name=sender_id,
+                    post_date=datetime.fromtimestamp(timestamp / 100),
+                    post_id=message_id,
+                    token=secret_token,
+                    json=timestamp
+                )
+
+                instagramUser.save()
 
             return HttpResponse(
                 json.dumps(body),
@@ -112,43 +122,3 @@ def create_post(request):
             json.dumps({"nothing to see": "this isn't happening"}),
             content_type="application/json"
         )
-
-# def process_payment(request):
-
-#     if request.method == 'POST':
-#         payment_data = {
-#             "transaction_amount": 100,
-#             "description": "Título do produto",
-#             "payment_method_id": "pix",
-#             "payer": {
-#                 "email": "demonteiro04@gmail.com",
-#                 "first_name": "Débora",
-#                 "last_name": "Pianco",
-#                 "identification": {
-#                     "type": "CPF",
-#                     "number": "45068180831"
-#                 },
-#                 "address": {
-#                     "zip_code": "06233-200",
-#                     "street_name": "Av. das Nações Unidas",
-#                     "street_number": "3003",
-#                     "neighborhood": "Bonfim",
-#                     "city": "Osasco",
-#                     "federal_unit": "SP"
-#                 }
-#             }
-#          }
-
-#         payment_response = sdk.payment().create(payment_data)
-#         payment = payment_response["response"]['point_of_interaction']['transaction_data']
-#         return render(
-#             request,
-#             'payment.html',
-#             {'payment': payment }
-#         )
-#     else:
-#         return HttpResponse(
-#             json.dumps({"nothing to see": "this isn't happening"}),
-#             content_type="application/json"
-#         )
-   
