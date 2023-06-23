@@ -49,7 +49,7 @@ def mentioned(request):
             
             secret_token = secrets.token_hex(3)[:6].upper()
 
-            instagram_acces_token = os.environ('instagram_acces_token')
+            instagram_acces_token = os.environ.get('instagram_acces_token')
 
             url = f'https://graph.facebook.com/v17.0/me/messages?access_token={instagram_acces_token}'
 
