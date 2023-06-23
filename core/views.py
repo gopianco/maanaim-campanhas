@@ -3,7 +3,6 @@ import secrets
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
 from django.views.generic import TemplateView
 
 from .models import Bread, SaleItem, Campaing, InstagramUser
@@ -52,23 +51,29 @@ def mentioned(request):
     if request.method == 'POST':
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        content = body['value']
+        entry = body["entry"][0]
+        messaging = entry["messaging"][0]
+        message = messaging["message"]
         
-        isntagramUser = InstagramUser(
-            user_name = content['sender']['id'],
-            post_date = datetime.fromtimestamp(int(content['timestamp'])),
-            post_id = content['message']['mid'],
-            token = secrets.token_hex(3)[:6].upper(),
-            json = body
-        )
+        if message["attachments"][0]["type"] == "story_mention":
+            sender_id = messaging["sender"]["id"]
+            timestamp = messaging["timestamp"]
+            message_id = message["mid"]
+            
+            instagramUser = InstagramUser(
+                user_name=sender_id,
+                post_date=datetime.fromtimestamp(timestamp),
+                post_id=message_id,
+                token=secrets.token_hex(3)[:6].upper(),
+                json=body
+            )
 
-        isntagramUser.save()
+            instagramUser.save()
 
-        print(InstagramUser)
-        return HttpResponse(
-            json.dumps( content),
-            content_type="application/json"
-        )
+            return HttpResponse(
+                json.dumps(body),
+                content_type="application/json"
+            )
     
     if request.method == 'GET':
         mode         = request.GET.get("hub.mode")
