@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 
-from .models import Bread, SaleItem, Campaing, InstagramUser
+from .models import InstagramUser
 
 class IndexView(TemplateView):
     template_name = 'index.html'
@@ -25,6 +25,8 @@ def verify_token(request):
                 instagramUser.rewarded = True
                 instagramUser.rewarded_date = datetime.now()
                 instagramUser.save()
+
+                
                 return JsonResponse({'message': f'Parabéns {instagramUser.user_name}, Recebe sua recompensa!', 'status': 'success'})
             else:
                 return JsonResponse({'message': f'Usuário {instagramUser.user_name} já recompensado.', 'status': 'error'})
@@ -36,52 +38,33 @@ def verify_token(request):
 @csrf_exempt
 def mentioned(request):
     if request.method == 'POST':
-        body_unicode = request.body.decode('utf-8')
-        body = json.loads(body_unicode)
-        entry = body["entry"][0]
-        messaging = entry["messaging"][0]
-        message = messaging["message"]
         
-        if message["attachments"][0]["type"] == "story_mention":
-            sender_id = messaging["sender"]["id"]
-            timestamp = messaging["timestamp"]
-            message_id = message["mid"]
-            
+        data = json.loads(request.body)
+        
+        auth_token = data['auth_token']
+        if auth_token == os.environ.get("TOKEN"):
+            username = data['username']
+            full_name = data['full_name']
+
             secret_token = secrets.token_hex(3)[:6].upper()
 
-            instagram_acces_token = os.environ.get('instagram_acces_token')
+            instagramUser = InstagramUser(
+                user_name=username,
+                post_date=datetime.now(),
+                post_id=full_name,
+                token=secret_token,
+                json=json.dumps(request.body.decode('utf-8'))
+            )
 
-            url = f'https://graph.facebook.com/v17.0/me/messages?access_token={instagram_acces_token}'
-
-            headers = {
-                'Content-Type': 'application/json'
-            }
-
-            payload = {
-                'recipient': {
-                    'id': sender_id
-                },
-                'message': {
-                    'text': f'Seu código de verificação: {secret_token}'
-                }
-            }
-
-            response = requests.post(url, headers=headers, json=payload)
-
-            if response.status_code == 200:
-
-                instagramUser = InstagramUser(
-                    user_name=sender_id,
-                    post_date=datetime.fromtimestamp(timestamp / 100),
-                    post_id=message_id,
-                    token=secret_token,
-                    json=timestamp
-                )
-
-                instagramUser.save()
+            instagramUser.save()
 
             return HttpResponse(
-                json.dumps(body),
+                json.dumps({'token': secret_token}),
+                content_type="application/json"
+            )
+        else:
+             return HttpResponse(
+                json.dumps({'message': 'Não autorizado.'}),
                 content_type="application/json"
             )
     
@@ -90,7 +73,7 @@ def mentioned(request):
         challenge    = request.GET.get("hub.challenge")
         verify_token = request.GET.get("hub.verify_token")
 
-        if verify_token == 'abb0c1a0-509a-4694-b595-4c616b636661':
+        if verify_token == os.environ.get("TOKEN"):
             return HttpResponse(
                 challenge ,
                 content_type="application/json"
