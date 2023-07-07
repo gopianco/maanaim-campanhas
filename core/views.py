@@ -1,6 +1,7 @@
 import json
-import requests
+import websocket
 import secrets
+import time
 import os
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
@@ -15,25 +16,36 @@ class IndexView(TemplateView):
 @csrf_exempt
 def verify_token(request):
     if request.method == 'POST':
+        # Obtenha o token do corpo da solicitação
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
-        token = body['token'] 
-        
+        token = body['token']
+
         try:
             instagramUser = InstagramUser.objects.get(token=token)
             if not instagramUser.rewarded:
-                instagramUser.rewarded = True
+                ws = websocket.WebSocket()
+                ws.connect("ws://192.168.0.16:80/ws")  # Substitua pelo endereço IP do seu servidor Wemos D1
+                ws.send("ligar")
+                
+                time.sleep(10)  # Aguardar 3 segundos
+                
+                ws.send("desligar")
+                ws.close()  # Fechar a conexão imediatamente após o envio da mensagem
+
+                instagramUser.rewarded = Trueverc
                 instagramUser.rewarded_date = datetime.now()
                 instagramUser.save()
 
-                
-                return JsonResponse({'message': f'Parabéns {instagramUser.user_name}, Recebe sua recompensa!', 'status': 'success'})
+                return JsonResponse({'message': f'Parabéns {instagramUser.post_id}, Recebe sua recompensa!', 'status': 'success'})
             else:
-                return JsonResponse({'message': f'Usuário {instagramUser.user_name} já recompensado.', 'status': 'error'})
+                return JsonResponse({'message': f'Usuário {instagramUser.post_id} já recompensado.', 'status': 'error'})
         except InstagramUser.DoesNotExist:
             return JsonResponse({'message': 'Código inválido.', 'status': 'error'})
-    
-    return JsonResponse({'message': 'Método não permitido.', 'status': 'error'})
+    else:
+        return JsonResponse({'message': 'Método não permitido.', 'status': 'error'})
+
+
 
 @csrf_exempt
 def mentioned(request):
